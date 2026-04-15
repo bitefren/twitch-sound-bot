@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>SoundBot Overlay</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            background: transparent;
+            overflow: hidden;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #9146FF, #6441a5);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-family: 'Space Grotesk', sans-serif;
+            color: white;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(-120%);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 4px 20px rgba(145, 70, 255, 0.5);
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification .icon {
+            font-size: 24px;
+        }
+        
+        .notification .user {
+            font-weight: 600;
+        }
+        
+        .notification .sound {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="notification" id="notif">
+        <span class="icon">🔊</span>
+        <span class="user" id="username"></span>
+        <span class="sound">→</span>
+        <span class="sound" id="soundname"></span>
+    </div>
+    
+    <audio id="audio"></audio>
+    
+    <script>
+        const channel = "{{ channel }}";
+        const audio = document.getElementById('audio');
+        const notif = document.getElementById('notif');
+        const usernameEl = document.getElementById('username');
+        const soundnameEl = document.getElementById('soundname');
+        
+        async function poll() {
+            try {
+                const res = await fetch(`/poll/${channel}`);
+                const data = await res.json();
+                
+                if (data.sound) {
+                    // Show notification
+                    usernameEl.textContent = data.username;
+                    soundnameEl.textContent = data.sound.replace(`${channel}_`, '').replace('.mp3', '');
+                    notif.classList.add('show');
+                    
+                    // Play sound
+                    audio.src = `/audio/${data.sound}`;
+                    audio.play();
+                    
+                    // Hide notification after 3s
+                    setTimeout(() => {
+                        notif.classList.remove('show');
+                    }, 3000);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+            
+            setTimeout(poll, 1500);
+        }
+        
+        poll();
+    </script>
+</body>
+</html>

@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SoundBot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #0f0f1a;
+            color: #fff;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: rgba(20, 20, 35, 0.95);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .channel-badge {
+            background: #9146FF;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .logout-btn {
+            color: #888;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .logout-btn:hover {
+            color: #fff;
+        }
+        
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+        }
+        
+        @media (max-width: 900px) {
+            .main {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        /* Overlay URL Box */
+        .overlay-box {
+            background: linear-gradient(135deg, #9146FF22, #00D4FF11);
+            border: 1px solid #9146FF44;
+        }
+        
+        .overlay-url {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .overlay-url input {
+            flex: 1;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 0.8rem 1rem;
+            color: #fff;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        
+        .copy-btn {
+            background: #9146FF;
+            border: none;
+            border-radius: 8px;
+            padding: 0.8rem 1.2rem;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .copy-btn:hover {
+            background: #a855f7;
+        }
+        
+        /* Upload Zone */
+        .upload-zone {
+            border: 2px dashed rgba(255,255,255,0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 1rem;
+        }
+        
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #9146FF;
+            background: rgba(145, 70, 255, 0.1);
+        }
+        
+        .upload-zone input {
+            display: none;
+        }
+        
+        .upload-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .upload-text {
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        .upload-form {
+            display: none;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+        
+        .upload-form.active {
+            display: grid;
+        }
+        
+        .upload-form input {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 0.7rem 1rem;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+        
+        .upload-form input::placeholder {
+            color: #666;
+        }
+        
+        .upload-btn {
+            background: #22c55e;
+            border: none;
+            border-radius: 8px;
+            padding: 0.8rem;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        
+        /* Sound List */
+        .sound-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+        
+        .sound-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 0.8rem 1rem;
+        }
+        
+        .sound-item .name {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .sound-item .cost {
+            color: #fbbf24;
+            font-size: 0.85rem;
+        }
+        
+        .sound-item button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 0.3rem;
+            opacity: 0.6;
+            transition: all 0.2s;
+        }
+        
+        .sound-item button:hover {
+            opacity: 1;
+        }
+        
+        .sound-item .play-btn:hover { color: #22c55e; }
+        .sound-item .delete-btn:hover { color: #ef4444; }
+        
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        
+        /* Config */
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .config-item label {
+            display: block;
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 0.4rem;
+        }
+        
+        .config-item input {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 0.7rem;
+            color: #fff;
+            font-size: 1rem;
+        }
+        
+        .save-config {
+            grid-column: span 2;
+            background: #3b82f6;
+            border: none;
+            border-radius: 8px;
+            padding: 0.8rem;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        
+        /* Users & Logs */
+        .user-row, .log-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.9rem;
+        }
+        
+        .user-row:last-child, .log-row:last-child {
+            border: none;
+        }
+        
+        .user-points {
+            color: #fbbf24;
+        }
+        
+        .log-sound {
+            color: #9146FF;
+        }
+        
+        .log-time {
+            color: #666;
+            font-size: 0.8rem;
+        }
+        
+        /* Commands Box */
+        .commands-list {
+            font-size: 0.9rem;
+        }
+        
+        .command {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.6rem;
+        }
+        
+        .command code {
+            background: rgba(145, 70, 255, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .command span {
+            color: #888;
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #22c55e;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🔊 SoundBot</h1>
+        <div class="header-right">
+            <span class="channel-badge">{{ channel }}</span>
+            <a href="/logout" class="logout-btn">Cerrar sesión</a>
+        </div>
+    </header>
+    
+    <main class="main">
+        <div class="left-col">
+            <!-- Overlay URL -->
+            <div class="card overlay-box">
+                <div class="card-title">🔗 Tu Overlay para OBS</div>
+                <div class="overlay-url">
+                    <input type="text" id="overlay-url" value="{{ overlay_url }}" readonly>
+                    <button class="copy-btn" onclick="copyOverlay()">Copiar</button>
+                </div>
+                <p style="margin-top: 0.8rem; font-size: 0.8rem; color: #888;">
+                    OBS → Fuentes → Browser Source → Pega esta URL
+                </p>
+            </div>
+            
+            <!-- Upload Sounds -->
+            <div class="card">
+                <div class="card-title">🎵 Sonidos</div>
+                
+                <div class="upload-zone" id="dropZone">
+                    <input type="file" id="fileInput" accept=".mp3,.wav,.ogg">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">Arrastra un audio o haz click para subir</div>
+                </div>
+                
+                <div class="upload-form" id="uploadForm">
+                    <input type="text" id="soundName" placeholder="Nombre del comando (ej: airhorn)">
+                    <input type="number" id="soundCost" placeholder="Costo en puntos" value="50">
+                    <button class="upload-btn" onclick="uploadSound()">Subir sonido</button>
+                </div>
+                
+                <div class="sound-list" id="soundList">
+                    {% if sounds %}
+                        {% for sound in sounds %}
+                        <div class="sound-item" data-name="{{ sound.name }}">
+                            <span class="name">{{ sound.name }}</span>
+                            <span class="cost">{{ sound.cost }} pts</span>
+                            <button class="play-btn" onclick="playSound('{{ sound.filename }}')">▶️</button>
+                            <button class="delete-btn" onclick="deleteSound('{{ sound.name }}')">🗑️</button>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">No hay sonidos. ¡Sube el primero!</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Config -->
+            <div class="card">
+                <div class="card-title">⚙️ Configuración</div>
+                <div class="config-grid">
+                    <div class="config-item">
+                        <label>Puntos por mensaje</label>
+                        <input type="number" id="pointsPerMsg" value="{{ config.points_per_msg if config else 1 }}" min="1">
+                    </div>
+                    <div class="config-item">
+                        <label>Cooldown (segundos)</label>
+                        <input type="number" id="cooldown" value="{{ config.cooldown if config else 30 }}" min="0">
+                    </div>
+                    <button class="save-config" onclick="saveConfig()">Guardar cambios</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="right-col">
+            <!-- Commands -->
+            <div class="card">
+                <div class="card-title">💬 Comandos del Chat</div>
+                <div class="commands-list">
+                    <div class="command">
+                        <code>!puntos</code>
+                        <span>Ver puntos</span>
+                    </div>
+                    <div class="command">
+                        <code>!sonidos</code>
+                        <span>Lista disponible</span>
+                    </div>
+                    <div class="command">
+                        <code>!canjear nombre</code>
+                        <span>Reproducir sonido</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Top Users -->
+            <div class="card">
+                <div class="card-title">🏆 Top Usuarios</div>
+                {% if top_users %}
+                    {% for user in top_users %}
+                    <div class="user-row">
+                        <span>{{ user.username }}</span>
+                        <span class="user-points">{{ user.points }} pts</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">Sin datos aún</div>
+                {% endif %}
+            </div>
+            
+            <!-- Recent Logs -->
+            <div class="card">
+                <div class="card-title">📜 Canjes Recientes</div>
+                {% if logs %}
+                    {% for log in logs %}
+                    <div class="log-row">
+                        <span>{{ log.username }} → <span class="log-sound">{{ log.sound }}</span></span>
+                        <span class="log-time">-{{ log.cost }}pts</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">Sin canjes aún</div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+    
+    <div class="toast" id="toast">✓ Copiado!</div>
+    
+    <audio id="previewAudio"></audio>
+    
+    <script>
+        let selectedFile = null;
+        
+        // Drag & Drop
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadForm = document.getElementById('uploadForm');
+        
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            handleFile(e.dataTransfer.files[0]);
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            handleFile(e.target.files[0]);
+        });
+        
+        function handleFile(file) {
+            if (!file) return;
+            selectedFile = file;
+            dropZone.innerHTML = `
+                <div class="upload-icon">🎵</div>
+                <div class="upload-text">${file.name}</div>
+            `;
+            uploadForm.classList.add('active');
+            document.getElementById('soundName').value = file.name.replace(/\.[^/.]+$/, '').toLowerCase().replace(/\s+/g, '_');
+        }
+        
+        async function uploadSound() {
+            if (!selectedFile) return;
+            
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('name', document.getElementById('soundName').value);
+            formData.append('cost', document.getElementById('soundCost').value);
+            
+            const res = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (res.ok) {
+                showToast('Sonido subido!');
+                location.reload();
+            }
+        }
+        
+        async function deleteSound(name) {
+            if (!confirm(`¿Eliminar ${name}?`)) return;
+            
+            await fetch(`/delete_sound/${name}`, { method: 'POST' });
+            document.querySelector(`[data-name="${name}"]`).remove();
+            showToast('Sonido eliminado');
+        }
+        
+        function playSound(filename) {
+            const audio = document.getElementById('previewAudio');
+            audio.src = `/audio/${filename}`;
+            audio.play();
+        }
+        
+        async function saveConfig() {
+            const res = await fetch('/update_config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    points_per_msg: parseInt(document.getElementById('pointsPerMsg').value),
+                    cooldown: parseInt(document.getElementById('cooldown').value)
+                })
+            });
+            
+            if (res.ok) showToast('Configuración guardada');
+        }
+        
+        function copyOverlay() {
+            const input = document.getElementById('overlay-url');
+            input.select();
+            document.execCommand('copy');
+            showToast('URL copiada!');
+        }
+        
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = '✓ ' + msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+    </script>
+</body>
+</html>
